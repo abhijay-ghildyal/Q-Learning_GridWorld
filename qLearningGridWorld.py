@@ -29,7 +29,6 @@ class Q_learning_Agent:
         ##### Agent intializations #####
         self.beta = 0.9
         self.actions = {'L':1,'R':2,'U':3,'D':4}
-        self.actions_ = ['L','R','U','D']
         self.env = Env()
         self.epsilon = 0.1 # Change
         self.alpha = 0.01
@@ -85,20 +84,23 @@ class Q_learning_Agent:
         action = self.get_action(exploration)
         
         state = [self.currentLocation[0],self.currentLocation[1]]
-        state_ = self.get_new_state(action+1) ##### Next state #####
         
-        if state_ != self.env.goal:
-            self.currentLocation = state_
+        ##### Next state for max Q' #####
+        # Next state is based on the agent's action
+        next_state = self.get_new_state(action+1) # +1 because actions are [1,4] and get_move_{egreedy,boltzman} return [0,1..
+        
+        if next_state != self.env.goal:
+            self.currentLocation = next_state
             self.act()
         
-        if (state_[0], state_[1]) in self.env.reward.keys():
-            reward = self.env.reward[(state_[0], state_[1])]
+        if (next_state[0], next_state[1]) in self.env.reward.keys():
+            reward = self.env.reward[(next_state[0], next_state[1])]
         else:
             reward = 0
             
         self.totalReward+=reward
             
-        maxQnext = np.max(self.q[ state_[0]-1, state_[1]-1])
+        maxQnext = np.max(self.q[ next_state[0]-1, next_state[1]-1])
         
         # Q learning
         self.q[ state[0]-1, state[1]-1, action] += \
